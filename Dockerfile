@@ -105,6 +105,10 @@ RUN set -xe \
 		--with-openssl \
 		--with-zlib \
 		\
+        --with-mysql \
+        --with-mysqli \
+        --with-pdo-mysql \
+        \
         --with-apxs2=/usr/local/apache2/bin/apxs \
         \
 		$PHP_EXTRA_CONFIGURE_ARGS \
