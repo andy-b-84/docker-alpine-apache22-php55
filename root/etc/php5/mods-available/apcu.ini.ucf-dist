@@ -1,3 +1,0 @@
-; configuration for php apcu module
-; priority=20
-extension=apcu.so

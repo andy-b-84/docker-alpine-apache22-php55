@@ -121,9 +121,12 @@ RUN set -xe \
 			| xargs -r apk info --installed \
 			| sort -u \
 	)" \
-	&& apk add --no-cache --virtual .php-rundeps $runDeps \
-	\
-	&& apk del .build-deps
+	&& apk add --no-cache --virtual .php-rundeps $runDeps
+
+RUN yes "" | pecl install apcu-4.0.11 -R /usr/local/lib/php/extensions/no-debug-non-zts-20121212
+RUN yes "" | pecl install mongodb -R /usr/local/lib/php/extensions/no-debug-non-zts-20121212
+	
+RUN apk del .build-deps
 
 COPY docker-php-ext-* docker-php-entrypoint /usr/local/bin/
 
