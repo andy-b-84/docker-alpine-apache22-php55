@@ -12,7 +12,9 @@ RUN apk add 'autoconf<2.70' \
             'libedit<20150325.4.0' \
             'sqlite-libs<3.14.0' \
             'libxml2<2.10.0' \
-            'xz<5.3.0'
+            'xz<5.3.0' \
+            'wget<1.19' \
+            'gnupg<2.2.0'
 
 ENV PHP_INI_DIR /usr/local/etc/php
 RUN mkdir -p $PHP_INI_DIR/conf.d
@@ -49,4 +51,27 @@ ENV PHP_VERSION 5.6.30
 ENV PHP_URL="http://secure.php.net/get/php-5.5.38.tar.xz/from/this/mirror" PHP_ASC_URL="https://secure.php.net/get/php-5.5.38.tar.xz.asc/from/this/mirror"
 ENV PHP_SHA256="cb527c44b48343c8557fe2446464ff1d4695155a95601083e5d1f175df95580f" PHP_MD5="72302e26f153687e2ca922909f927443"
 
+RUN set -xe; \
+    \
+    mkdir -p /usr/src; \
+    cd /usr/src; \
+    \
+    wget -O php.tar.xz "$PHP_URL"; \
+    \
+    if [ -n "$PHP_SHA256" ]; then \
+        echo "$PHP_SHA256 *php.tar.xz" | sha256sum -c -; \
+    fi; \
+    if [ -n "$PHP_MD5" ]; then \
+        echo "$PHP_MD5 *php.tar.xz" | md5sum -c -; \
+    fi; \
+    \
+    if [ -n "$PHP_ASC_URL" ]; then \
+        wget -O php.tar.xz.asc "$PHP_ASC_URL"; \
+        export GNUPGHOME="$(mktemp -d)"; \
+        for key in $GPG_KEYS; do \
+            gpg --keyserver ha.pool.sks-keyservers.net --recv-keys "$key"; \
+        done; \
+        gpg --batch --verify php.tar.xz.asc php.tar.xz; \
+        rm -r "$GNUPGHOME"; \
+    fi;
 
