@@ -108,6 +108,7 @@ RUN set -xe \
         --with-mysql \
         --with-mysqli \
         --with-pdo-mysql \
+        --with-readline \
         \
         --with-apxs2=/usr/local/apache2/bin/apxs \
         \
