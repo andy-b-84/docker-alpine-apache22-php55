@@ -10,6 +10,7 @@ ENV PHPIZE_DEPS \
         make \
         pkgconf \
         re2c
+ENV APACHE2_CONF_FILE /usr/local/apache2/conf/httpd.conf
 ENV PHP_INI_DIR /usr/local/etc/php
 ENV PHP_SRC_DIR /usr/src/php
 ENV PHP_CFLAGS="-fstack-protector-strong -fpic -fpie -O2"
@@ -117,12 +118,18 @@ RUN apk add --no-cache --virtual .persistent-deps \
             | sort -u \
     )" \
     && apk add --no-cache --virtual .php-rundeps $runDeps \
+    && pecl install apcu-4.0.11 \
     \
     && apk del .build-deps \
     \
-    && sh -c "echo ''; echo ''; echo '<FilesMatch \.php$>'; echo '    SetHandler application/x-httpd-php'; echo '</FilesMatch>'; echo '';" >> /usr/local/apache2/conf/httpd.conf
+    && sh -c "echo ''; echo ''; echo '<FilesMatch \.php$>'; echo '    SetHandler application/x-httpd-php'; echo '</FilesMatch>'; echo '';" >> $APACHE2_CONF_FILE
 
 COPY docker-php-ext-* docker-php-entrypoint /usr/local/bin/
+
+RUN sed -i -- 's/#LoadModule rewrite_module/LoadModule rewrite_module/' $APACHE2_CONF_FILE \
+    && sed -i -- 's/#LoadModule headers_module/LoadModule headers_module/' $APACHE2_CONF_FILE \
+    && sed -i -- 's/#LoadModule expires_module/LoadModule expires_module/' $APACHE2_CONF_FILE \
+    && sed -i -- 's/#LoadModule deflate_module/LoadModule deflate_module/' $APACHE2_CONF_FILE
 
 EXPOSE 80
 
