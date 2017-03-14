@@ -17,10 +17,8 @@ ENV PHP_CFLAGS="-fstack-protector-strong -fpic -fpie -O2"
 ENV PHP_CPPFLAGS="$PHP_CFLAGS"
 ENV PHP_LDFLAGS="-Wl,-O1 -Wl,--hash-style=both -pie"
 
-ENV GPG_KEYS 0BD78B5F97500D450838F95DFE857D9A90D90EC1 6E4F6AB321FDC07F2C332E3AC2BF0BC433CFC8B3
-
 ENV PHP_VERSION 5.6.30
-ENV PHP_URL="https://secure.php.net/get/php-$PHP_VERSION.tar.xz/from/this/mirror" PHP_ASC_URL="https://secure.php.net/get/php-$PHP_VERSION.tar.xz.asc/from/this/mirror"
+ENV PHP_URL="https://secure.php.net/get/php-$PHP_VERSION.tar.xz/from/this/mirror"
 ENV PHP_SHA256="a363185c786432f75e3c7ff956b49c3369c3f6906a6b10459f8d1ddc22f70805" PHP_MD5="68753955a8964ae49064c6424f81eb3e"
 
 COPY root /
@@ -53,16 +51,6 @@ RUN apk add --no-cache --virtual .persistent-deps \
         echo "$PHP_MD5 *php.tar.xz" | md5sum -c -; \
     fi; \
     \
-    if [ -n "$PHP_ASC_URL" ]; then \
-        wget -O php.tar.xz.asc "$PHP_ASC_URL"; \
-        export GNUPGHOME="$(mktemp -d)"; \
-        for key in $GPG_KEYS; do \
-            gpg --keyserver ha.pool.sks-keyservers.net --recv-keys "$key"; \
-        done; \
-        gpg --batch --verify php.tar.xz.asc php.tar.xz; \
-        rm -r "$GNUPGHOME"; \
-    fi; \
-    \
     apk del .fetch-deps \
     && set -xe \
     && apk add --no-cache --virtual .build-deps \
@@ -91,9 +79,10 @@ RUN apk add --no-cache --virtual .persistent-deps \
         --enable-mbstring \
 # --enable-mysqlnd is included here because it's harder to compile after the fact than extensions are (since it's a plugin for several extensions, not an extension in itself)
         --enable-mysqlnd \
-        --enable-mysql \
-        --enable-mysqli \
-        --enable-pdo-mysql \
+        --enable-mysql=mysqlnd \
+        --enable-mysqli=mysqlnd \
+        --enable-pdo-mysql=mysqlnd \
+        --with-pdo-mysql=mysqlnd \
         \
         --with-curl \
         --with-libedit \
