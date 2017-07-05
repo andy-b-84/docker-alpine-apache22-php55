@@ -9,7 +9,9 @@ ENV PHPIZE_DEPS \
         libc-dev \
         make \
         pkgconf \
-        re2c
+        re2c \
+        icu-dev \
+        icu-libs
 ENV APACHE2_CONF_FILE /usr/local/apache2/conf/httpd.conf
 ENV PHP_INI_DIR /usr/local/etc/php
 ENV PHP_SRC_DIR /usr/src/php
@@ -77,6 +79,7 @@ RUN apk add --no-cache --virtual .persistent-deps \
         --enable-ftp \
 # --enable-mbstring is included here because otherwise there's no way to get pecl to use it properly (see https://github.com/docker-library/php/issues/195)
         --enable-mbstring \
+        --enable-intl \
 # --enable-mysqlnd is included here because it's harder to compile after the fact than extensions are (since it's a plugin for several extensions, not an extension in itself)
         --enable-mysqlnd \
         --enable-mysql=mysqlnd \
